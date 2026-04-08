@@ -8,6 +8,7 @@ import Register from './pages/Register';
 import CreateDeck from './pages/CreateDeck';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider, AuthContext } from './contexts/AuthContext';
+import { ToastProvider } from './contexts/ToastContext';
 import { Sun, Moon, BookOpen, LogOut, User } from 'lucide-react';
 import './index.css';
 import Sidebar from './components/Sidebar';
@@ -63,7 +64,9 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <AppContent />
+        <ToastProvider>
+          <AppContent />
+        </ToastProvider>
       </AuthProvider>
     </Router>
   );

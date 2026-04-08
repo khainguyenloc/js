@@ -90,16 +90,26 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
           <div className="sidebar-divider"></div>
           {isOpen ? (
             <div className="user-profile">
+              <div className="user-stats">
+                 <div className="stat-badge" title="Chuỗi ngày học liên tục">
+                    <span className="fire-icon">🔥</span>
+                    <span>{user.streak || 0}</span>
+                 </div>
+                 <div className="stat-badge" title="Điểm Kinh Nghiệm">
+                    <span className="xp-icon">⚡</span>
+                    <span>{user.xp || 0} XP</span>
+                 </div>
+              </div>
               <div className="user-info">
-                <strong>{user.username}</strong>
-                <button className="logout-btn" onClick={logout} title="Đăng xuất">
-                  <LogOut size={16} />
+                <strong style={{ fontSize: '15px' }}>{user.username}</strong>
+                <button className="icon-btn" onClick={logout} title="Đăng xuất" style={{ color: 'var(--danger-color)' }}>
+                  <LogOut size={18} />
                 </button>
               </div>
             </div>
           ) : (
-             <button className="icon-btn logout-only-btn" onClick={logout} title="Đăng xuất">
-                <LogOut size={24} />
+             <button className="icon-btn logout-only-btn" onClick={logout} title="Đăng xuất" style={{ margin: '0 auto', color: 'var(--danger-color)' }}>
+                <LogOut size={22} />
              </button>
           )}
         </div>

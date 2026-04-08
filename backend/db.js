@@ -8,7 +8,18 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME || 'flashcard_db',
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  // ✅ FIX GLOBAL: MySQL2 v3+ trả về BIGINT dưới dạng BigInt JS
+  // typeCast ép mọi cột số nguyên về Number thông thường
+  // Tránh lỗi so sánh BigInt !== Number ở mọi nơi trong project
+  typeCast: function (field, next) {
+    if (field.type === 'LONGLONG') {
+      const val = field.string();
+      return val === null ? null : Number(val);
+    }
+    return next();
+  }
 });
 
 module.exports = pool;
+

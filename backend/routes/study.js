@@ -5,10 +5,37 @@ const router = express.Router();
 
 router.use(authMiddleware);
 
+function formatInterval(days) {
+   if (days === 0) return '< 1d';
+   if (days === 1) return '1d';
+   if (days < 30) return `${days}d`;
+   if (days < 365) return `${Math.round(days / 30)}mo`;
+   return `${Math.round(days / 365)}y`;
+}
+
+function calculateNextIntervals(ease, interval_days) {
+    ease = ease || 2.5;
+    interval_days = interval_days || 0;
+    
+    let again_int = 0;
+    let hard_int = Math.max(1, Math.round(interval_days * 1.2));
+    let good_int = Math.max(1, Math.round((interval_days === 0 ? 1 : interval_days) * ease));
+    let ease_easy = ease + 0.15;
+    let easy_int = Math.max(1, Math.round((interval_days === 0 ? 1 : interval_days) * ease_easy * 1.3));
+    
+    return {
+        again: formatInterval(again_int),
+        hard: formatInterval(hard_int),
+        good: formatInterval(good_int),
+        easy: formatInterval(easy_int)
+    };
+}
+
 // Get cards out for review (either new ones without review, or due ones)
 router.get('/', async (req, res) => {
-    const { deck_id, force } = req.query;
-    if (!deck_id) return res.status(400).json({ message: 'deck_id is required' });
+    const force = req.query.force;
+    const deck_id = parseInt(req.query.deck_id, 10);
+    if (!deck_id || isNaN(deck_id)) return res.status(400).json({ message: 'deck_id is required' });
 
     try {
         let condition = "f.deck_id = ? AND (r.id IS NULL OR r.next_review_date <= CURDATE())";
@@ -25,7 +52,12 @@ router.get('/', async (req, res) => {
             LIMIT 50
         `, [req.user.id, deck_id]);
 
-        res.json({ status: 'success', data: cards });
+        const cardsWithIntervals = cards.map(c => ({
+            ...c,
+            btn_intervals: calculateNextIntervals(c.ease, c.interval_days)
+        }));
+
+        res.json({ status: 'success', data: cardsWithIntervals });
     } catch (err) {
         console.error(err);
         res.status(500).json({ status: 'error' });
@@ -58,7 +90,7 @@ router.post('/review', async (req, res) => {
         review_count += 1;
         if (quality === 'again') {
             ease = Math.max(1.3, ease - 0.2);
-            interval_days = 1;
+            interval_days = 0;
         } else if (quality === 'hard') {
             ease = Math.max(1.3, ease - 0.15);
             interval_days = Math.max(1, Math.round(interval_days * 1.2));
