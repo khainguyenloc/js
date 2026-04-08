@@ -38,52 +38,62 @@ export default function Register() {
     };
 
     return (
-        <div style={{ maxWidth: '400px', margin: '100px auto', padding: '20px' }} className="card">
-            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                <BookOpen size={48} />
-                <h2>Đăng ký Tài khoản</h2>
+        <div className="auth-page">
+            {/* VŨ TRỤ ẢO GIÁC PHÍA SAU (Orbs) */}
+            <div className="orb orb-1"></div>
+            <div className="orb orb-2"></div>
+            <div className="orb orb-3"></div>
+
+            <div className="glass-card">
+                <div className="auth-header">
+                    <BookOpen size={48} color="var(--success-color)" />
+                    <h2>Đăng ký Tài khoản</h2>
+                </div>
+                
+                {error && <div style={{ color: '#ef4444', marginBottom: '16px', textAlign: 'center', background: 'rgba(239, 68, 68, 0.1)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>{error}</div>}
+                {success && <div style={{ color: '#10b981', marginBottom: '16px', textAlign: 'center', background: 'rgba(16, 185, 129, 0.1)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>{success}</div>}
+                
+                <form onSubmit={handleRegister}>
+                    <div>
+                        <label style={{ fontWeight: '500', opacity: 0.8 }}>Tên đăng nhập:</label>
+                        <input 
+                            type="text" 
+                            className="glass-input"
+                            value={username} 
+                            onChange={(e) => setUsername(e.target.value)} 
+                            placeholder="Nhập tên đăng nhập"
+                            required 
+                        />
+                    </div>
+                    <div>
+                        <label style={{ fontWeight: '500', opacity: 0.8 }}>Mật khẩu:</label>
+                        <input 
+                            type="password" 
+                            className="glass-input"
+                            value={password} 
+                            onChange={(e) => setPassword(e.target.value)} 
+                            placeholder="Tạo mật khẩu"
+                            required 
+                        />
+                    </div>
+                    <div>
+                        <label style={{ fontWeight: '500', opacity: 0.8 }}>Nhập lại Mật khẩu:</label>
+                        <input 
+                            type="password" 
+                            className="glass-input"
+                            value={confirmPassword} 
+                            onChange={(e) => setConfirmPassword(e.target.value)} 
+                            placeholder="Xác nhận mật khẩu"
+                            required 
+                        />
+                    </div>
+                    <button type="submit" className="btn-success" style={{ width: '100%', marginTop: '10px', padding: '14px', fontSize: '16px' }}>Đăng ký trải nghiệm</button>
+                </form>
+                
+                <p style={{ marginTop: '24px', textAlign: 'center', opacity: 0.8 }}>
+                    Đã có tài khoản? <Link to="/login" style={{ color: 'var(--success-color)', fontWeight: '700', textDecoration: 'none' }}>Đăng nhập ngay</Link>
+                </p>
             </div>
-            
-            {error && <div style={{ color: 'red', marginBottom: '10px', textAlign: 'center' }}>{error}</div>}
-            {success && <div style={{ color: 'green', marginBottom: '10px', textAlign: 'center' }}>{success}</div>}
-            
-            <form onSubmit={handleRegister}>
-                <div style={{ marginBottom: '15px' }}>
-                    <label>Tên đăng nhập:</label>
-                    <input 
-                        type="text" 
-                        value={username} 
-                        onChange={(e) => setUsername(e.target.value)} 
-                        required 
-                        style={{ width: '100%', padding: '10px', marginTop: '5px' }}
-                    />
-                </div>
-                <div style={{ marginBottom: '15px' }}>
-                    <label>Mật khẩu:</label>
-                    <input 
-                        type="password" 
-                        value={password} 
-                        onChange={(e) => setPassword(e.target.value)} 
-                        required 
-                        style={{ width: '100%', padding: '10px', marginTop: '5px' }}
-                    />
-                </div>
-                <div style={{ marginBottom: '15px' }}>
-                    <label>Nhập lại Mật khẩu:</label>
-                    <input 
-                        type="password" 
-                        value={confirmPassword} 
-                        onChange={(e) => setConfirmPassword(e.target.value)} 
-                        required 
-                        style={{ width: '100%', padding: '10px', marginTop: '5px' }}
-                    />
-                </div>
-                <button type="submit" className="btn-primary" style={{ width: '100%' }}>Đăng ký</button>
-            </form>
-            
-            <p style={{ marginTop: '20px', textAlign: 'center' }}>
-                Đã có tài khoản? <Link to="/login">Đăng nhập</Link>
-            </p>
         </div>
     );
 }

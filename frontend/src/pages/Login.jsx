@@ -33,41 +33,50 @@ export default function Login() {
     };
 
     return (
-        <div style={{ maxWidth: '400px', margin: '100px auto', padding: '20px' }} className="card">
-            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                <BookOpen size={48} />
-                <h2>Đăng nhập Flashcard</h2>
+        <div className="auth-page">
+            {/* VŨ TRỤ ẢO GIÁC PHÍA SAU (Orbs) */}
+            <div className="orb orb-1"></div>
+            <div className="orb orb-2"></div>
+            <div className="orb orb-3"></div>
+
+            <div className="glass-card">
+                <div className="auth-header">
+                    <BookOpen size={48} color="var(--primary-color)" />
+                    <h2>Đăng nhập Flashcard</h2>
+                </div>
+                
+                {error && <div style={{ color: '#ef4444', marginBottom: '16px', textAlign: 'center', background: 'rgba(239, 68, 68, 0.1)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>{error}</div>}
+                
+                <form onSubmit={handleLogin}>
+                    <div>
+                        <label style={{ fontWeight: '500', opacity: 0.8 }}>Tên đăng nhập:</label>
+                        <input 
+                            type="text" 
+                            className="glass-input"
+                            value={username} 
+                            onChange={(e) => setUsername(e.target.value)} 
+                            placeholder="Nhập tên đăng nhập"
+                            required 
+                        />
+                    </div>
+                    <div>
+                        <label style={{ fontWeight: '500', opacity: 0.8 }}>Mật khẩu:</label>
+                        <input 
+                            type="password" 
+                            className="glass-input"
+                            value={password} 
+                            onChange={(e) => setPassword(e.target.value)} 
+                            placeholder="••••••••"
+                            required 
+                        />
+                    </div>
+                    <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '10px', padding: '14px', fontSize: '16px' }}>Đăng nhập ngay</button>
+                </form>
+                
+                <p style={{ marginTop: '24px', textAlign: 'center', opacity: 0.8 }}>
+                    Học viên mới? <Link to="/register" style={{ color: 'var(--primary-color)', fontWeight: '700', textDecoration: 'none' }}>Đăng ký tạo tài khoản</Link>
+                </p>
             </div>
-            
-            {error && <div style={{ color: 'red', marginBottom: '10px', textAlign: 'center' }}>{error}</div>}
-            
-            <form onSubmit={handleLogin}>
-                <div style={{ marginBottom: '15px' }}>
-                    <label>Tên đăng nhập:</label>
-                    <input 
-                        type="text" 
-                        value={username} 
-                        onChange={(e) => setUsername(e.target.value)} 
-                        required 
-                        style={{ width: '100%', padding: '10px', marginTop: '5px' }}
-                    />
-                </div>
-                <div style={{ marginBottom: '15px' }}>
-                    <label>Mật khẩu:</label>
-                    <input 
-                        type="password" 
-                        value={password} 
-                        onChange={(e) => setPassword(e.target.value)} 
-                        required 
-                        style={{ width: '100%', padding: '10px', marginTop: '5px' }}
-                    />
-                </div>
-                <button type="submit" className="btn-primary" style={{ width: '100%' }}>Đăng nhập</button>
-            </form>
-            
-            <p style={{ marginTop: '20px', textAlign: 'center' }}>
-                Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link>
-            </p>
         </div>
     );
 }

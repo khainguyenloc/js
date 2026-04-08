@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { API_URL } from '../config';
+import { API_URL, BASE_URL } from '../config';
 import { ArrowLeft, ImagePlus, X, Volume2, AlertTriangle, Edit2, Trash2 } from 'lucide-react';
 import { useToast } from '../contexts/ToastContext';
-
-const BACKEND = 'http://localhost:3000';
 
 const getImageSrc = (url) => {
   if (!url) return null;
   if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  return `${BACKEND}${url}`;
+  return `${BASE_URL}${url}`;
 };
 
 function CardManager() {

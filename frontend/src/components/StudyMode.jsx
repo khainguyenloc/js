@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { API_URL } from '../config';
+import { API_URL, BASE_URL } from '../config';
 import { ArrowLeft, Volume2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import AiChatbox from './AiChatbox';
-
-const BACKEND = 'http://localhost:3000';
 
 // Nếu là ảnh local (/uploads/...) thì thêm backend URL, còn external URL thì dùng thẳng
 const getImageSrc = (url) => {
   if (!url) return null;
   if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  return `${BACKEND}${url}`;
+  return `${BASE_URL}${url}`;
 };
 
 function StudyMode() {
@@ -119,6 +117,24 @@ function StudyMode() {
     }
   };
 
+  useEffect(() => {
+    // Kích hoạt pháo hoa khi vừa hoàn thành bộ thẻ
+    if (!isLoading && currentIndex > 0 && currentIndex === cardsToReview.length) {
+      const duration = 3 * 1000;
+      const animationEnd = Date.now() + duration;
+      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+
+      const interval = setInterval(function() {
+        const timeLeft = animationEnd - Date.now();
+        if (timeLeft <= 0) return clearInterval(interval);
+        const particleCount = 50 * (timeLeft / duration);
+        confetti(Object.assign({}, defaults, { particleCount, origin: { x: Math.random(), y: Math.random() - 0.2 } }));
+      }, 250);
+      
+      return () => clearInterval(interval);
+    }
+  }, [currentIndex, cardsToReview?.length, isLoading]);
+
   if (isLoading) return (
     <div className="flashcard-container">
       <div className="flashcard-inner">
@@ -152,47 +168,61 @@ function StudyMode() {
   if (!isLoading && currentIndex >= cardsToReview.length && cardsToReview.length > 0) {
     const total = sessionStats.easy + sessionStats.medium + sessionStats.hard;
 
-    // Trigger Confetti Gamification Component when session is complete
-    if (currentIndex > 0 && currentIndex === cardsToReview.length) {
-      confetti({
-        particleCount: 150,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#3b82f6', '#10b981', '#fbbf24', '#f43f5e']
-      });
-      // prevent re-triggering continuously by just setting state, but simplest is relying on the fact that this render only runs after state updates
-    }
-
     return (
-      <div className="card text-center" style={{ maxWidth: '650px', margin: '40px auto', padding: '40px' }}>
-        <div style={{ fontSize: '60px', marginBottom: '20px' }}>🎉</div>
-        <h2 className="mb-4" style={{ fontSize: '28px', fontWeight: '800', background: 'linear-gradient(90deg, var(--primary-color), var(--success-color))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-          Bạn đã hoàn thành phiên học!
+      <div className="card text-center" style={{ 
+        maxWidth: '650px', 
+        margin: '40px auto', 
+        padding: '50px 40px',
+        background: 'rgba(255, 255, 255, 0.1)',
+        backdropFilter: 'blur(24px)',
+        border: '1px solid rgba(255, 255, 255, 0.3)',
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+        animation: 'slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1)'
+      }}>
+        <div style={{ fontSize: '70px', marginBottom: '20px', filter: 'drop-shadow(0 10px 10px rgba(0,0,0,0.2))' }}>🏆</div>
+        <h2 className="mb-4" style={{ 
+          fontSize: '32px', 
+          fontWeight: '800', 
+          background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)', 
+          WebkitBackgroundClip: 'text', 
+          WebkitTextFillColor: 'transparent',
+          letterSpacing: '-0.5px'
+        }}>
+          Xuất sắc! Phiên học hoàn tất!
         </h2>
-        <p style={{ fontSize: '18px', marginBottom: '30px', opacity: 0.8 }}>
-          Bạn đã cày qua <strong>{total}</strong> thẻ. Quá là tuyệt vời! 🔥
+        <p style={{ fontSize: '18px', marginBottom: '36px', opacity: 0.9 }}>
+          Bạn đã ghi nhớ thành công <strong>{total}</strong> thẻ ngày hôm nay. Não bộ của bạn vừa được "nâng cấp" thêm một bậc! 🚀
         </p>
-        <div className="card" style={{ display: 'flex', justifyContent: 'space-around', margin: '0 0 30px', background: 'rgba(255,255,255,0.05)', boxShadow: 'none' }}>
-          <div style={{ color: 'var(--success-color)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-             <span style={{ fontSize: '24px', fontWeight: '800' }}>{sessionStats.easy}</span>
-             <span style={{ fontSize: '13px', textTransform: 'uppercase', letterSpacing: '1px' }}>Dễ (Easy)</span>
+        
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: '1fr 1fr 1fr', 
+          gap: '16px',
+          margin: '0 0 40px' 
+        }}>
+          <div style={{ background: 'rgba(16, 185, 129, 0.15)', padding: '20px', borderRadius: '20px', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+             <div style={{ color: 'var(--success-color)', fontSize: '32px', fontWeight: '800', marginBottom: '4px' }}>{sessionStats.easy}</div>
+             <div style={{ color: 'var(--text-color)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', opacity: 0.8, fontWeight: '700' }}>Rất Dễ</div>
           </div>
-          <div style={{ color: 'var(--warning-color)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-             <span style={{ fontSize: '24px', fontWeight: '800' }}>{sessionStats.medium}</span>
-             <span style={{ fontSize: '13px', textTransform: 'uppercase', letterSpacing: '1px' }}>Vừa (Medium)</span>
+          <div style={{ background: 'rgba(245, 158, 11, 0.15)', padding: '20px', borderRadius: '20px', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+             <div style={{ color: 'var(--warning-color)', fontSize: '32px', fontWeight: '800', marginBottom: '4px' }}>{sessionStats.medium}</div>
+             <div style={{ color: 'var(--text-color)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', opacity: 0.8, fontWeight: '700' }}>Bình Thường</div>
           </div>
-          <div style={{ color: 'var(--danger-color)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-             <span style={{ fontSize: '24px', fontWeight: '800' }}>{sessionStats.hard}</span>
-             <span style={{ fontSize: '13px', textTransform: 'uppercase', letterSpacing: '1px' }}>Khó (Hard)</span>
+          <div style={{ background: 'rgba(239, 68, 68, 0.15)', padding: '20px', borderRadius: '20px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+             <div style={{ color: 'var(--danger-color)', fontSize: '32px', fontWeight: '800', marginBottom: '4px' }}>{sessionStats.hard}</div>
+             <div style={{ color: 'var(--text-color)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', opacity: 0.8, fontWeight: '700' }}>Cần Lưu Ý</div>
           </div>
         </div>
+        
         <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
-          <button className="btn-outline" onClick={() => navigate('/')} style={{ flex: 1 }}>Quay lại trang chủ</button>
+          <button className="btn-outline" onClick={() => navigate('/')} style={{ flex: 1, padding: '16px', fontSize: '16px' }}>Trở về Thư viện</button>
           <button className="btn-primary" onClick={() => {
               setSessionStats({ easy: 0, medium: 0, hard: 0 });
               setCurrentIndex(0);
               fetchCardsToReview(true);
-          }} style={{ flex: 1 }}>Ôn lại toàn bộ</button>
+          }} style={{ flex: 1, padding: '16px', fontSize: '16px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', border: 'none' }}>
+            Ôn luyện đợt 2 ngay
+          </button>
         </div>
       </div>
     );
