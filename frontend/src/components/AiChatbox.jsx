@@ -3,10 +3,10 @@ import { Bot, X, Send, AlertTriangle } from 'lucide-react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // ============================================================
-// CẤU HÌNH AI TRỰC TIẾP TẠI FRONTEND (DÀNH CHO BÁO CÁO)
+// CẤU HÌNH AI (ĐƯỢC BẢO MẬT BẰNG BIẾN MÔI TRƯỜNG VITE)
 // ============================================================
-const GEMINI_API_KEY = "AIzaSyCBdaMoNXHUJAd6GSOVOKaGfNvkfYjBZhM"; 
-const genAI = new GoogleGenerativeAI(GEMINI_API_KEY, { apiVersion: 'v1' }); // ÉP DÙNG V1 ỔN ĐỊNH
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY; 
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY, { apiVersion: 'v1' });
 
 const AiChatbox = ({ currentCard }) => {
   const [isOpen, setIsOpen] = useState(false);
