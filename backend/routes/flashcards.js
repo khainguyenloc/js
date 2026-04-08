@@ -64,7 +64,7 @@ router.get('/', async (req, res) => {
         
         // Lấy tất cả flashcard của deck đó
         const [cards] = await pool.query(
-            'SELECT * FROM flashcards WHERE deck_id = ? ORDER BY created_at DESC',
+            'SELECT * FROM flashcards WHERE deck_id = ? ORDER BY id DESC',
             [deck_id]
         );
         
