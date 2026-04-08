@@ -1,17 +1,15 @@
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
-const pool = mysql.createPool({
+const dbConfig = {
   host: process.env.DB_HOST || '127.0.0.1',
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_NAME || 'flashcard_db',
+  port: process.env.DB_PORT || 3306,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  // ✅ FIX GLOBAL: MySQL2 v3+ trả về BIGINT dưới dạng BigInt JS
-  // typeCast ép mọi cột số nguyên về Number thông thường
-  // Tránh lỗi so sánh BigInt !== Number ở mọi nơi trong project
   typeCast: function (field, next) {
     if (field.type === 'LONGLONG') {
       const val = field.string();
@@ -19,7 +17,14 @@ const pool = mysql.createPool({
     }
     return next();
   }
-});
+};
+
+// 👉 CỰC KỲ QUAN TRỌNG CHO RENDER & AIVEN: Bật SSL nếu không phải máy cá nhân
+if (dbConfig.host !== '127.0.0.1' && dbConfig.host !== 'localhost') {
+  dbConfig.ssl = { rejectUnauthorized: false };
+}
+
+const pool = mysql.createPool(dbConfig);
 
 module.exports = pool;
 

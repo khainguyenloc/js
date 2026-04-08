@@ -46,6 +46,83 @@ app.post("/api/upload", upload.single("image"), (req, res) => {
   res.json({ status: "success", url: imageUrl });
 });
 
+// 👉 MÀN HÌNH CẤU HÌNH TỰ ĐỘNG (Dùng khi mạng lên Render/Aiven lần đầu)
+app.get("/api/setup", async (req, res) => {
+  try {
+    const pool = require("./db");
+    
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        username VARCHAR(50) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL,
+        last_login_date DATE NULL,
+        xp INT DEFAULT 0,
+        streak INT DEFAULT 0,
+        role VARCHAR(20) DEFAULT 'user'
+      )
+    `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS decks (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        name VARCHAR(100) NOT NULL,
+        description TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      )
+    `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS flashcards (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        deck_id INT NOT NULL,
+        question TEXT NOT NULL,
+        answer TEXT NOT NULL,
+        media_url VARCHAR(255),
+        type VARCHAR(50) DEFAULT 'basic',
+        options JSON,
+        box_number INT DEFAULT 1,
+        next_review_date DATE,
+        btn_intervals JSON,
+        FOREIGN KEY (deck_id) REFERENCES decks(id) ON DELETE CASCADE
+      )
+    `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS reviews (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        card_id INT NOT NULL,
+        ease VARCHAR(20),
+        interval_days INT,
+        next_review_date DATE,
+        review_count INT DEFAULT 1,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (card_id) REFERENCES flashcards(id) ON DELETE CASCADE
+      )
+    `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS study_sessions (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        date DATE,
+        cards_reviewed INT DEFAULT 0,
+        correct_count INT DEFAULT 0,
+        xp_earned INT DEFAULT 0,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      )
+    `);
+
+    res.json({ status: "success", message: "Đã tự động khởi tạo các bảng (Tables) thành công cho Database của bạn!" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ status: "error", message: err.message });
+  }
+});
+
 const PORT = process.env.PORT || 3306;
 app.listen(PORT, () => {
   console.log(`Server đang chạy tại http://localhost:${PORT}`);
