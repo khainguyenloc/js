@@ -1,117 +1,75 @@
-# 🎓 Flashcard AI Tutor - Hệ thống Học tập Thông minh
+# 🎓 Bí kíp Bảo vệ Đồ án: Flashcard AI Tutor
 
-Chào mừng bạn đến với **Flashcard AI Tutor**, một ứng dụng học tập hiện đại kết hợp sức mạnh của phương pháp **Spaced Repetition (Lặp lại ngắt quãng)** và trí tuệ nhân tạo **Gemini AI** để tối ưu hóa quá trình ghi nhớ từ vựng và kiến thức.
-
----
-
-## 🚀 Tính năng nổi bật
-
-- **🤖 AI Tutor (Gemini Integration)**: Trợ lý ảo hỗ trợ giải thích từ vựng, đưa ra ví dụ thực tế và tìm từ đồng nghĩa ngay trong lúc học.
-- **🧠 Thuật toán SRS (SuperMemo-2)**: Tự động tính toán ngày ôn tập tối ưu dựa trên mức độ ghi nhớ của bạn, giúp tiết kiệm thời gian và nhớ lâu hơn.
-- **🎮 Gamification**: Hệ thống điểm kinh nghiệm (XP) và Chuỗi ngày học (Streak) giúp tạo động lực học tập mỗi ngày.
-- **🖼️ Đa phương tiện**: Hỗ trợ đính kèm hình ảnh vào các thẻ ghi nhớ (Flashcard) để tăng khả năng liên tưởng.
-- **📱 Giao diện hiện đại**: Thiết kế Dark Mode chuyên nghiệp theo phong cách Quizlet, tối ưu cho trải nghiệm người dùng.
+Tài liệu này được biên soạn đặc biệt để làm "Phao cứu sinh" cho bạn khi lên thuyết trình dự án trước giảng viên. Hãy đọc kỹ, nắm rõ các khái niệm để đối đáp trôi chảy nhé!
 
 ---
 
-## 🛠️ Công nghệ sử dụng (Tech Stack)
+## 1. 🏗️ Kiến trúc Hệ thống (System Architecture)
 
-### 💻 Frontend
-- **React 19**: Thư viện UI mạnh mẽ nhất hiện nay.
-- **Vite**: Công cụ build siêu nhanh thay thế cho Create React App.
-- **React Router Dom 7**: Quản lý điều hướng trang.
-- **Lucide React**: Bộ icon phong cách tối giản và hiện đại.
-- **Canvas Confetti**: Hiệu ứng chúc mừng khi hoàn thành mục tiêu học tập.
-- **Vanilla CSS**: Tùy biến giao diện linh hoạt, tối ưu hiệu năng.
+Dự án hoạt động theo mô hình **Client-Server (Khách - Chủ)** kết nối qua chuẩn **RESTful API**.
 
-### ⚙️ Backend
-- **Node.js & Express 5**: Framework backend tin cậy và hiệu năng cao.
-- **MySQL (mysql2)**: Cơ sở dữ liệu quan hệ mạnh mẽ.
-- **JWT (JsonWebToken)**: Hệ thống xác thực người dùng an toàn.
-- **Bcrypt**: Mã hoá mật khẩu bảo mật tuyệt đối.
-- **Multer**: Xử lý tải lên hình ảnh cho Flashcard.
-- **Gemini AI SDK**: Kết nối trực tiếp với các mô hình ngôn ngữ lớn của Google.
+### Hai hệ thống giao tiếp với nhau như thế nào?
+1. **Giao thức:** Frontend và Backend nói chuyện với nhau thông qua mạng HTTP/HTTPS bằng thư viện `fetch()` của trình duyệt. 
+2. **Định dạng dữ liệu:** Mọi trao đổi đều được gói dưới dạng chuỗi **JSON** (JavaScript Object Notation). 
+3. **CORS (Cross-Origin Resource Sharing):** Vì Frontend chạy ở tên miền khác (ví dụ `port 5173` hoặc Render) so với Backend (ở `port 3000`), trình duyệt mặc định sẽ chặn kết nối để chống hack. Để giải quyết, Backend sử dụng thư viện `cors` để cấp phép "mở cửa" cho Frontend kết nối vào.
+4. **Xác thực (Authentication):** Khi Frontend gọi Backend để lấy bài học, nó phải gửi kèm tấm vé thông hành là **JWT Token** (đặt ở Header `Authorization: Bearer <token>`). Backend sẽ kiểm tra vé này, nếu đúng mới nhả dữ liệu MySQL về.
 
 ---
 
-## 📊 Cơ cấu Cơ sở dữ liệu (Database Schema)
+## 2. 💻 Công nghệ Frontend (Giao diện)
+*Frontend là phần người dùng nhìn thấy, được viết theo dạng Single Page Application (Web một trang không cần tải lại).*
 
-Dự án sử dụng 5 bảng chính trong cơ sở dữ liệu `flashcard_db`:
-
-1. **`users`**: Lưu trữ thông tin tài khoản, mật khẩu (đã mã hoá), XP và Streak.
-2. **`decks`**: Quản lý các bộ thẻ (decks) do người dùng tạo ra.
-3. **`flashcards`**: Lưu trữ các câu hỏi, câu trả lời, hình ảnh và loại thẻ (basic, trắc nghiệm...).
-4. **`reviews`**: Trái tim của hệ thống SRS, lưu trữ chỉ số `ease`, `interval_days` và `next_review_date` cho từng thẻ.
-5. **`study_sessions`**: Ghi lại lịch sử học tập hàng ngày để tính toán điểm thưởng và thống kê.
-
----
-
-## 🤖 Cơ chế AI Tutor
-
-Hệ thống AI được thiết kế cực kỳ linh hoạt:
-- **Tự động chọn Model**: Ưu tiên sử dụng `Gemini 2.0 Flash Lite`, `1.5 Flash` tùy theo hạn mức API.
-- **Chế độ Smart Mock**: Nếu chưa có API Key, hệ thống sẽ tự động chuyển sang chatbot thông minh được lập trình sẵn để đảm bảo trải nghiệm không bị gián đoạn.
-- **Hỗ trợ 4 chế độ**: Giải thích chi tiết, Lấy ví dụ, Tìm từ đồng nghĩa và Chat tự do về từ vựng.
+- **React 19 (Hooks):** Thư viện UI cốt lõi của Facebook. Tốc độ cao nhờ cơ chế Virtual DOM (DOM ảo).
+- **Vite:** Công cụ Build (đóng gói) dự án thế hệ mới, nhanh gấp 10 lần Create-React-App truyền thống.
+- **React Router Dom (v7):** Dùng để tạo các đường link (`/login`, `/study`) mà không làm tải lại (F5) trang web.
+- **Lucide-React:** Thư viện Icon hiện đại bằng SVG, nhẹ và có thể đổi màu/kích thước bằng CSS.
+- **Canvas-Confetti:** Thư viện tạo ra hiệu ứng "Cơn mưa pháo hoa" rực rỡ khi học xong bộ thẻ.
+- **CSS3 (Vanilla + Glassmorphism):** Tự viết CSS tay hoàn toàn. Sử dụng kỹ thuật `backdrop-filter: blur(30px)` để tạo hiệu ứng "Kính mờ" xuyên thấu sang trọng. Lật thẻ 3D dùng phép biến hình `transform: rotateY()` qua hai mặt thay thế cho kỹ năng `preserve-3d` để tránh lỗi của Google Chrome.
 
 ---
 
-## 🧠 Thuật toán Lặp lại ngắt quãng (SRS)
+## 3. ⚙️ Công nghệ Backend (Máy chủ & Xử lý logic)
+*Backend đóng vai trò như bộ não và thủ kho, kiểm tra quy tắc và ghi chép dữ liệu.*
 
-Ứng dụng áp dụng phiên bản cải tiến của **SM-2 (SuperMemo 2)**:
-- **Again**: Reset chu kỳ, ôn tập lại ngay.
-- **Hard**: Tăng khoảng cách nhẹ (x1.2), giảm độ dễ.
-- **Good**: Tăng khoảng cách theo hệ số Ease (x2.5).
-- **Easy**: Tăng mạnh khoảng cách (x3.25), tăng độ dễ.
-
----
-
-## 🏗️ Hướng dẫn cài đặt & Chạy dự án
-
-### 1. Yêu cầu hệ thống
-- **Node.js** (v18 trở lên)
-- **MySQL Server** đang chạy.
-
-### 2. Cài đặt Cơ sở dữ liệu
-```bash
-# Vào thư mục backend
-cd backend
-# Chạy script khởi tạo DB (Đảm bảo file .env đã cấu hình DB_USER, DB_PASSWORD)
-node setup_db.js
-```
-
-### 3. Khởi động Backend
-```bash
-cd backend
-npm install
-npm run dev
-```
-
-### 4. Khởi động Frontend
-```bash
-cd frontend
-npm install
-npm run dev
-```
+- **Node.js:** Môi trường chạy Javascript trên máy chủ ngoài trình duyệt. Chạy bất đồng bộ (Non-blocking I/O) nên chịu tải cực tốt.
+- **Express.js:** Framework mạnh nhất của Node.js để thiết lập các đường dẫn API (`/api/auth`, `/api/decks`).
+- **MySQL2 (mysql2/promise):** Trình điều khiển (Driver) giúp Nodejs kết nối đến MySQL và thực hiện các câu lệnh SQL tự động dưới dạng `async/await`.
+- **JWT (Json Web Token):** Mã hóa phiên đăng nhập thành một chuỗi mã cực dài. Backend không cần lưu trạng thái người dùng (Stateless) mà chỉ cần giải mã chuỗi này là biết ai đang gọi.
+- **Bcrypt:** Hàm băm (Hash) một chiều dùng để mã hóa mật khẩu. Nếu hacker trộm được Database cũng không thể đọc ra mật khẩu gốc. Lần đăng nhập sau, `bcrypt.compare` sẽ đối chiếu mật khẩu người dùng gõ vào và mã băm.
+- **Multer:** Thư viện "Bắt" các file hình ảnh upload lên Backend và lưu chúng lại vào thư mục `/uploads`.
+- **Dotenv:** Thư viện đọc biến môi trường bảo mật.
 
 ---
 
-## 📁 Cấu trúc thư mục chính
-
-```text
-├── backend/
-│   ├── routes/         # Các API endpoint (auth, ai, decks, study...)
-│   ├── middleware/     # Bảo mật và xác thực JWT
-│   ├── server.js       # File khởi chạy server chính
-│   └── db.js           # Kết nối database MySQL
-├── frontend/
-│   ├── src/
-│   │   ├── components/ # Các thành phần giao diện (Sidebar, Chatbox, CardManager...)
-│   │   ├── pages/      # Các trang chính (Login, Register, Dashboard...)
-│   │   ├── contexts/   # Quản lý trạng thái (Auth, Toast...)
-│   │   └── App.jsx     # Thành phần gốc điều hướng
-└── README.md           # Hướng dẫn này
-```
+## 4. 🤖 Cách AI Tutor (Gemini) Hoạt động
+Giảng viên có thể sẽ hỏi: *"Em gọi AI như thế nào?"*
+**Câu trả lời chuẩn:** Dạ, ban đầu em định đưa logic gọi AI xuống Backend, nhưng để giảm độ trễ (latency) xuống mức thấp nhất và trải nghiệm người dùng là "thời gian thực" (Realtime), em đã cho Frontend gọi thẳng lên chuẩn **REST API v1beta của Google Generative Language** thông qua `fetch()`.
+- Em chuẩn bị chuỗi `systemRole` ngầm ép AI đóng vai một chuyên gia Gia Sư tiếng Anh, không được tiết lộ thân phận là một con AI.
+- Mọi Key bảo mật được đặt an toàn thông qua biến môi trường `import.meta.env.VITE_GEMINI_API_KEY` chứ không code chết trên máy.
+- Nếu Google báo lỗi `503 High Demand` (Nghẽn mạng), hệ thống của em có thiết lập một vòng lặp chạy mảng `for` để **Tự động chuyển đổi mô hình (Intelligent Model Fallback)** từ bản nặng `gemini-2.5-flash` sang bản nhẹ `gemini-2.5-flash-lite` mà người dùng không hề bị đứt đoạn trải nghiệm!
 
 ---
 
-*Chúc bạn có những trải nghiệm học tập tuyệt vời với Flashcard AI Tutor! 🚀*
+## 5. 🧠 Phân tích Thuật toán Lặp Lại (Spaced Repetition)
+Hệ thống tính ngày xuất hiện của Flashcard dựa trên độ khó mà người dùng chọn (Lấy cảm hứng từ thuật toán SuperMemo-2):
+- **Cấu trúc lưu trữ:** Bảng `reviews` trên MySQL ghi lại độ dễ `ease` và ngày học kế tiếp `next_review_date`.
+- **Logic Tính toán:** Nếu chọn "Easy" (Dễ), khoảng cách ngày học sẽ nhân lên với cường số cao (VD: 3 ngày -> 10 ngày). Nếu chọn "Again", khoảng cách bị reset về 0 để học lại ngay lập tức. Câu lệnh SQL `WHERE next_review_date <= CURDATE()` sẽ giúp Frontend lấy ra được chính xác các từ cần học đúng vào ngày hôm nay.
+
+---
+
+## 6. 🔥 Tủ Câu Hỏi - "Bộ Đề Cứu Nguy" khi bị Giảng Viên Vặn Hỏi
+
+**❓ Thầy/Cô hỏi: Tại sao em lại cấu hình một cái Router tên là `/api/setup` trên Backend?**
+> **Trả lời:** Dạ, khi cấu hình hệ thống trên mây (Deploy lên mạng), Database Aiven lúc đó hoàn toàn trống trơn. Thay vì em phải lên trang quản lý gõ SQL tạo từng bảng DB cho thầy cô xem 1 cách cực khổ, em viết tự động một Endpoint cải tiến mang tên `/api/setup` chạy lệnh `CREATE TABLE IF NOT EXISTS`. Chỉ cần truy cập đúng link đó 1 lần, Backend sẽ tự động Build trọn bộ khung cơ sở dữ liệu. Kỹ năng này tương đương với khái niệm Auto Migration của các doanh nghiệp lớn.
+
+**❓ Thầy/Cô hỏi: Mật khẩu người dùng trong DB của em có bị lộ/bị hack không?**
+> **Trả lời:** Chắc chắn là không ạ. Khi người dùng Register, em truyền mật khẩu qua hàm `bcrypt.hash()` với độ khó (salt) = 10, biến đoạn text "123456" thành dãy băm 60 ký tự lộn xộn. Bản thân em kể cả khi chọc vào Admin Database trực tiếp cũng không thể dịch ngược ra mật khẩu gốc được.
+
+**❓ Thầy/Cô hỏi: Làm sao ứng dụng em phân biệt được Sinh viên A và Sinh viên B để trả về đúng thẻ bài của người đó?**
+> **Trả lời:** Chìa khóa ở đây là cơ chế bảo mật (JWT). Khi sinh viên Login thành công, hệ thống nhả ra cái Token. Frontend nhét Token đó vào bộ nhớ trong `localStorage`. Từ đó về sau, mỗi lần gọi hàm lấy bài học, vòng lặp Frontend sẽ đính cái dây Token này vào Header API. Tới máy chủ Backend, một "cửa ải" Middleware tên là `auth.js` sẽ bắt Token đó lại, lấy khóa bí mật `JWT_SECRET` để giải mã ra được cái `user_id` thật của người đó, gán vào `req.user`. Từ đó các khối lệnh SQL sau này chỉ xài biến `user_id` nội bộ đó. Tuyệt đối không ai hack qua được dữ liệu của nhau.
+
+**❓ Thầy/Cô hỏi: Cấu hình tải và sử dụng Ảnh (Upload Hình minh họa thẻ bài) hoạt động ra sao?**
+> **Trả lời:** Em sử dụng gói `multer` trên API Backend của em. Dữ liệu thay vì truyền JSON thì ở đây nó sẽ truyền định dạng FormData (Dạng nhị phân). Khi nhận được file ảnh, Backend sẽ lưu xuống ổ cứng và cấp ngay cái chuỗi đường dẫn `/uploads/hihi.png` đáp lại Frontend. Frontend sau đó sẽ lưu chuỗi `/uploads/...` đó vào Database làm thông tin thẻ, và dùng đường dẫn đó hiển thị ra thẻ HTML là xong ạ.
+
+---
+*Cảm ơn bạn đã hợp tác cùng siêu trí tuệ nhân tạo Antigravity. Chúc bạn báo cáo đạt thủ khoa xuất sắc nhất khóa! 🚀*

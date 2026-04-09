@@ -96,7 +96,9 @@ const AiChatbox = ({ currentCard }) => {
       console.error('AI Error:', err);
       let errorMsg = err.message;
       if (errorMsg.includes('high demand') || errorMsg.includes('UNAVAILABLE')) {
-        errorMsg = '⚠️ Máy chủ AI của Google đang quá tải (Tắc đường mạng). Bạn đợi 5 giây rồi bấm gửi lại nhé!';
+        errorMsg = '⚠️ Máy chủ AI đang phục vụ quá nhiều học sinh. Bạn vui lòng đợi 5 giây rồi bấm gửi lại nhé!';
+      } else if (errorMsg.includes('RESOURCE_EXHAUSTED') || errorMsg.includes('quota')) {
+        errorMsg = '⏳ Tốc độ hỏi đang hơi nhanh đó! Mạng lưới bảo mật tạm ngắt để tránh lạm dụng. Hệ thống sẽ tự hồi phục sau 15 giây, bạn hãy ngâm cứu thẻ khác rồi quay lại hỏi tôi nhé!';
       }
       setMessages(prev => [...prev, { sender: 'bot', text: errorMsg }]);
     }
